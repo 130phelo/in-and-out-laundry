@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Book a Collection | In & Out Laundry</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">🧺</div>
+        In & Out Laundry
+      </a>
+      <button class="menu-toggle" aria-label="Menu">☰</button>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="booking.html" class="active">Book Now</a></li>
+        <li id="authLinks">
+          <a href="login.html" class="btn btn-outline btn-sm">Log In</a>
+          <a href="register.html" class="btn btn-primary btn-sm" style="margin-left:0.5rem">Register</a>
+        </li>
+        <li id="userLinks" class="hidden">
+          <a href="dashboard.html">My Orders</a>
+          <a href="settings.html">Settings</a>
+          <a href="#" onclick="logout(); return false;" class="btn btn-outline btn-sm">Logout (<span id="navUserName"></span>)</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="section-title">
+      <h2>Book a Collection</h2>
+      <p>Fill in the details below and we’ll take care of the rest</p>
+    </div>
+
+    <div class="form-card">
+      <div id="alertBox"></div>
+      <form id="bookingForm">
+        <div class="form-group">
+          <label for="service">Service</label>
+          <select id="service" class="form-control" required></select>
+        </div>
+        <div class="form-group">
+          <label for="quantity">Quantity</label>
+          <input type="number" id="quantity" class="form-control" min="1" value="1" required />
+        </div>
+        <div class="form-group">
+          <label for="address">Collection Address</label>
+          <input type="text" id="address" class="form-control" placeholder="Street address, suburb, city" required />
+        </div>
+        <div class="form-group">
+          <label for="date">Preferred Collection Date</label>
+          <input type="date" id="date" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label for="notes">Notes (optional)</label>
+          <textarea id="notes" class="form-control" rows="3" placeholder="Special instructions, fabric notes..."></textarea>
+        </div>
+        <div id="pricePreview" class="alert alert-info" style="display:none"></div>
+        <button type="submit" class="btn btn-primary" style="width:100%">Confirm Booking</button>
+      </form>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2026 In & Out Laundry · Code Wave Solutions</p>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = getCurrentUser();
+      if (!user) {
+        showAlert('alertBox', 'Please <a href="login.html">log in</a> or <a href="register.html">register</a> to place a booking.', 'info');
+      }
+
+      const services = getData(STORAGE_KEYS.services);
+      const select = document.getElementById('service');
+      const params = new URLSearchParams(window.location.search);
+      const preselect = params.get('service');
+
+      select.innerHTML = services.map(s =>
+        `<option value="${s.id}" ${preselect == s.id ? 'selected' : ''}>${s.name} – ${formatCurrency(s.price)} ${s.unit}</option>`
+      ).join('');
+
+      // Set min date to tomorrow
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      document.getElementById('date').min = tomorrow.toISOString().split('T')[0];
+
+      function updatePreview() {
+        const sid = Number(select.value);
+        const qty = Number(document.getElementById('quantity').value) || 1;
+        const svc = services.find(s => s.id === sid);
+        if (svc) {
+          const el = document.getElementById('pricePreview');
+          el.style.display = 'block';
+          el.innerHTML = `Estimated total: <strong>${formatCurrency(svc.price * qty)}</strong>`;
+        }
+      }
+      select.addEventListener('change', updatePreview);
+      document.getElementById('quantity').addEventListener('input', updatePreview);
+      updatePreview();
+
+      document.getElementById('bookingForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (!getCurrentUser()) {
+          showAlert('alertBox', 'You must be logged in to book. <a href="login.html">Log in now</a>.', 'danger');
+          return;
+        }
+        const result = createBooking(
+          select.value,
+          document.getElementById('quantity').value,
+          document.getElementById('address').value,
+          document.getElementById('date').value,
+          document.getElementById('notes').value
+        );
+        if (result.success) {
+          showAlert('alertBox', `Booking #${result.booking.id} created successfully! Redirecting to your orders...`, 'success');
+          setTimeout(() => window.location.href = 'dashboard.html', 1200);
+        } else {
+          showAlert('alertBox', result.message, 'danger');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

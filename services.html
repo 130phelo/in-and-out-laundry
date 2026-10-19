@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Services & Prices | In & Out Laundry</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">🧺</div>
+        In & Out Laundry
+      </a>
+      <button class="menu-toggle" aria-label="Menu">☰</button>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="services.html" class="active">Services</a></li>
+        <li><a href="booking.html">Book Now</a></li>
+        <li id="authLinks">
+          <a href="login.html" class="btn btn-outline btn-sm">Log In</a>
+          <a href="register.html" class="btn btn-primary btn-sm" style="margin-left:0.5rem">Register</a>
+        </li>
+        <li id="userLinks" class="hidden">
+          <a href="dashboard.html">My Orders</a>
+          <a href="settings.html">Settings</a>
+          <a href="#" onclick="logout(); return false;" class="btn btn-outline btn-sm">Logout (<span id="navUserName"></span>)</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="section-title">
+      <h2>Our Services & Prices</h2>
+      <p>Transparent pricing · Professional care · Convenient collection</p>
+    </div>
+
+    <div class="card-grid" id="servicesGrid"></div>
+
+    <div class="text-center mt-3">
+      <a href="booking.html" class="btn btn-primary">Book a Service Now</a>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2026 In & Out Laundry · Code Wave Solutions</p>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const services = getData(STORAGE_KEYS.services);
+      document.getElementById('servicesGrid').innerHTML = services.map(s => `
+        <div class="card">
+          <div class="card-icon">${s.icon}</div>
+          <h3>${s.name}</h3>
+          <p>${s.description}</p>
+          <div class="price">${formatCurrency(s.price)} <small style="font-size:0.85rem;font-weight:400;color:var(--gray)">${s.unit}</small></div>
+          <a href="booking.html?service=${s.id}" class="btn btn-outline btn-sm mt-2">Select</a>
+        </div>
+      `).join('');
+    });
+  </script>
+</body>
+</html>

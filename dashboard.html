@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Orders | In & Out Laundry</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">🧺</div>
+        In & Out Laundry
+      </a>
+      <button class="menu-toggle" aria-label="Menu">☰</button>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="booking.html">Book Now</a></li>
+        <li id="authLinks">
+          <a href="login.html" class="btn btn-outline btn-sm">Log In</a>
+        </li>
+        <li id="userLinks" class="hidden">
+          <a href="dashboard.html" class="active">My Orders</a>
+          <a href="settings.html">Settings</a>
+          <a href="#" onclick="logout(); return false;" class="btn btn-outline btn-sm">Logout (<span id="navUserName"></span>)</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="dashboard-header">
+      <div>
+        <h2>My Orders</h2>
+        <p style="color:var(--gray)">Track and manage your laundry bookings</p>
+      </div>
+      <a href="booking.html" class="btn btn-primary">+ New Booking</a>
+    </div>
+
+    <div id="alertBox"></div>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Order #</th>
+            <th>Service</th>
+            <th>Qty</th>
+            <th>Total</th>
+            <th>Collection Date</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="ordersBody">
+          <tr><td colspan="6" class="text-center">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2026 In & Out Laundry · Code Wave Solutions</p>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = getCurrentUser();
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      const bookings = getUserBookings(user.id);
+      const tbody = document.getElementById('ordersBody');
+
+      if (bookings.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center">No bookings yet. <a href="booking.html">Place your first order</a>.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = bookings.map(b => `
+        <tr>
+          <td><strong>#${b.id}</strong></td>
+          <td>${b.serviceName}</td>
+          <td>${b.quantity}</td>
+          <td>${formatCurrency(b.total)}</td>
+          <td>${formatDate(b.collectionDate)}</td>
+          <td><span class="status ${statusClass(b.status)}">${b.status}</span></td>
+        </tr>
+      `).join('');
+    });
+  </script>
+</body>
+</html>

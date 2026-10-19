@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Log In | In & Out Laundry</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">🧺</div>
+        In & Out Laundry
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="register.html">Register</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="auth-page">
+    <div class="auth-card">
+      <h2>Welcome Back</h2>
+      <p class="subtitle">Log in to manage your bookings</p>
+      <div id="alertBox"></div>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" class="form-control" placeholder="you@example.com" required />
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" class="form-control" placeholder="••••••••" required />
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%">Log In</button>
+      </form>
+
+      <div class="auth-footer">
+        Don't have an account? <a href="register.html">Register here</a>
+      </div>
+
+      <div class="alert alert-info mt-2" style="font-size:0.85rem">
+        <strong>Demo accounts (10 admins + 10 customers):</strong><br>
+        <strong>Admin:</strong> admin1@inandoutlaundry.co.za / Admin1!<br>
+        <strong>Customer:</strong> thabo@example.com / Customer1!<br>
+        <small>Admins: Admin1! … Admin10! &nbsp;|&nbsp; Customers: Customer1! … Customer10!</small>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const result = loginUser(email, password);
+      if (result.success) {
+        showAlert('alertBox', 'Login successful! Redirecting...', 'success');
+        setTimeout(() => {
+          window.location.href = result.user.role === 'admin' ? 'admin.html' : 'dashboard.html';
+        }, 800);
+      } else {
+        showAlert('alertBox', result.message, 'danger');
+      }
+    });
+  </script>
+</body>
+</html>

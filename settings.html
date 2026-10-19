@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Settings | In & Out Laundry</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">🧺</div>
+        In & Out Laundry
+      </a>
+      <button class="menu-toggle" aria-label="Menu">☰</button>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="dashboard.html">My Orders</a></li>
+        <li id="userLinks">
+          <a href="settings.html" class="active">Settings</a>
+          <a href="#" onclick="logout(); return false;" class="btn btn-outline btn-sm">Logout (<span id="navUserName"></span>)</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="section-title">
+      <h2>Account Settings</h2>
+      <p>Update your personal information</p>
+    </div>
+
+    <div class="form-card">
+      <div id="alertBox"></div>
+      <form id="settingsForm">
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input type="tel" id="phone" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label for="newPassword">New Password (leave blank to keep current)</label>
+          <input type="password" id="newPassword" class="form-control" minlength="6" placeholder="Min 6 characters" />
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%">Save Changes</button>
+      </form>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2026 In & Out Laundry · Code Wave Solutions</p>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = getCurrentUser();
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      document.getElementById('name').value = user.name || '';
+      document.getElementById('email').value = user.email || '';
+      document.getElementById('phone').value = user.phone || '';
+
+      document.getElementById('settingsForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const users = getData(STORAGE_KEYS.users);
+        const idx = users.findIndex(u => u.id === user.id);
+        if (idx === -1) return;
+
+        users[idx].name = document.getElementById('name').value.trim();
+        users[idx].email = document.getElementById('email').value.trim().toLowerCase();
+        users[idx].phone = document.getElementById('phone').value.trim();
+
+        const newPass = document.getElementById('newPassword').value;
+        if (newPass) {
+          if (newPass.length < 6) {
+            showAlert('alertBox', 'Password must be at least 6 characters.', 'danger');
+            return;
+          }
+          users[idx].password = btoa(newPass);
+        }
+
+        setData(STORAGE_KEYS.users, users);
+        setCurrentUser({
+          id: users[idx].id,
+          name: users[idx].name,
+          email: users[idx].email,
+          role: users[idx].role,
+          phone: users[idx].phone
+        });
+        updateNav();
+        showAlert('alertBox', 'Settings updated successfully.', 'success');
+      });
+    });
+  </script>
+</body>
+</html>
